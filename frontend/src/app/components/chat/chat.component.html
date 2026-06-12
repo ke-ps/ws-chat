@@ -8,7 +8,7 @@
       <div class="message" [class.mine]="message.sender === 'Tú'">
         <span class="sender">{{ message.sender }}</span>
         <span class="content">{{ message.content }}</span>
-        <span class="timestamp">{{ message.timestamp | date:'short' }}</span>
+        <span class="timestamp">{{ message.timestamp | date:'dd/MM/yyyy HH:mm' }}</span>
       </div>
     }
   </mat-card-content>

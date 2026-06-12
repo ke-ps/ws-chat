@@ -9,6 +9,12 @@ import { MatListModule } from '@angular/material/list';
 import { ChatService } from '../../services/chat.service';
 import { Message } from '../../models/message.model';
 
+// ============================================================
+// ChatComponent - Solo se encarga de la UI
+// NO tiene lógica de conexión ni comunicación
+// Todo eso está en ChatService
+// ============================================================
+
 @Component({
   selector: 'app-chat',
   standalone: true,
@@ -25,17 +31,26 @@ import { Message } from '../../models/message.model';
   styleUrl: './chat.component.scss'
 })
 export class ChatComponent {
+  // --------------------------------------------------------
+  // Inyectar ChatService para acceder a los mensajes
+  // --------------------------------------------------------
   private chatService = inject(ChatService);
-  messages$ = this.chatService.messages$;
-  newMessage = '';
+  messages$ = this.chatService.messages$; // Observable de mensajes
+  newMessage = ''; // Modelo del input de texto
 
+  // --------------------------------------------------------
+  // Enviar mensaje - llama al service, no hace nada más
+  // --------------------------------------------------------
   sendMessage(): void {
     if (this.newMessage.trim()) {
       this.chatService.sendMessage(this.newMessage);
-      this.newMessage = '';
+      this.newMessage = ''; // Limpiar input después de enviar
     }
   }
 
+  // --------------------------------------------------------
+  // trackBy para optimizar el render de la lista
+  // --------------------------------------------------------
   trackByMessageId(index: number, message: Message): string {
     return message.id;
   }
