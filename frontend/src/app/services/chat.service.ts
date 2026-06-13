@@ -28,11 +28,14 @@ export class ChatService {
   messages$: Observable<Message[]> = this.messagesSubject.asObservable();
 
   // --------------------------------------------------------
-  // PASO 2 - Configuración WebSocket
+  // PASO 2 - Configuración WebSocket y usuario
   // --------------------------------------------------------
   private ws: WebSocket | null = null;
   private wsUrl = 'ws://localhost:8000/ws';
   private useWebSocket = true;
+
+  // Nombre de usuario único para este navegador/sesión
+  private username = `User-${Math.floor(Math.random() * 9000) + 1000}`;
 
   constructor() {
     // Se conecta automáticamente al backend al iniciar
@@ -48,7 +51,7 @@ export class ChatService {
     const message: Message = {
       id: crypto.randomUUID(),
       content,
-      sender: 'Tú',
+      sender: this.username,
       timestamp: new Date()
     };
 
@@ -58,7 +61,7 @@ export class ChatService {
 
     // 3b. Enviar al servidor WebSocket para broadcast (incluye id para deduplicar)
     if (this.useWebSocket && this.ws && this.ws.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify({ id: message.id, content, sender: 'Tú' }));
+      this.ws.send(JSON.stringify({ id: message.id, content, sender: this.username }));
     }
   }
 
@@ -112,5 +115,12 @@ export class ChatService {
       this.ws.close();
       this.ws = null;
     }
+  }
+
+  // --------------------------------------------------------
+  // PASO 6 - Obtener nombre de usuario
+  // --------------------------------------------------------
+  getUsername(): string {
+    return this.username;
   }
 }

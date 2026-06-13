@@ -1,11 +1,12 @@
 <mat-card class="chat-container">
   <mat-card-header>
     <mat-card-title>Chat en tiempo real</mat-card-title>
+    <mat-card-subtitle>Conectado como: {{ username }}</mat-card-subtitle>
   </mat-card-header>
 
   <mat-card-content class="messages-list">
     @for (message of messages$ | async; track trackByMessageId($index, message)) {
-      <div class="message" [class.mine]="message.sender === 'Tú'">
+      <div class="message" [class.mine]="message.sender === username">
         <span class="sender">{{ message.sender }}</span>
         <span class="content">{{ message.content }}</span>
         <span class="timestamp">{{ message.timestamp | date:'dd/MM/yyyy HH:mm' }}</span>

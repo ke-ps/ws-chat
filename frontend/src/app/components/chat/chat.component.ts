@@ -37,6 +37,7 @@ export class ChatComponent {
   private chatService = inject(ChatService);
   messages$ = this.chatService.messages$; // Observable de mensajes
   newMessage = ''; // Modelo del input de texto
+  username = this.chatService.getUsername(); // Nombre de usuario único
 
   // --------------------------------------------------------
   // Enviar mensaje - llama al service, no hace nada más
