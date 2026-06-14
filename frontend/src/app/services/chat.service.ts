@@ -28,14 +28,12 @@ export class ChatService {
   messages$: Observable<Message[]> = this.messagesSubject.asObservable();
 
   // --------------------------------------------------------
-  // PASO 2 - Configuración WebSocket y usuario
+  // PASO 2 - Configuración WebSocket
+  // El sender ahora viene del componente (email del usuario Firebase)
   // --------------------------------------------------------
   private ws: WebSocket | null = null;
   private wsUrl = 'ws://localhost:8000/ws';
   private useWebSocket = true;
-
-  // Nombre de usuario único para este navegador/sesión
-  private username = `User-${Math.floor(Math.random() * 9000) + 1000}`;
 
   constructor() {
     // Se conecta automáticamente al backend al iniciar
@@ -46,12 +44,13 @@ export class ChatService {
 
   // --------------------------------------------------------
   // PASO 3 - Enviar mensaje
+  // sender = email del usuario autenticado con Firebase
   // --------------------------------------------------------
-  sendMessage(content: string): void {
+  sendMessage(content: string, sender: string): void {
     const message: Message = {
       id: crypto.randomUUID(),
       content,
-      sender: this.username,
+      sender,
       timestamp: new Date()
     };
 
@@ -61,7 +60,7 @@ export class ChatService {
 
     // 3b. Enviar al servidor WebSocket para broadcast (incluye id para deduplicar)
     if (this.useWebSocket && this.ws && this.ws.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify({ id: message.id, content, sender: this.username }));
+      this.ws.send(JSON.stringify({ id: message.id, content, sender }));
     }
   }
 
@@ -115,12 +114,5 @@ export class ChatService {
       this.ws.close();
       this.ws = null;
     }
-  }
-
-  // --------------------------------------------------------
-  // PASO 6 - Obtener nombre de usuario
-  // --------------------------------------------------------
-  getUsername(): string {
-    return this.username;
   }
 }

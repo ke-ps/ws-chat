@@ -1,0 +1,38 @@
+<div class="auth-container">
+  <mat-card class="auth-card">
+    <mat-card-header>
+      <mat-card-title>Iniciar sesión</mat-card-title>
+      <mat-card-subtitle>Accede a tu cuenta de Chat</mat-card-subtitle>
+    </mat-card-header>
+
+    <form class="auth-form" (ngSubmit)="onLogin()">
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" [(ngModel)]="email" name="email" placeholder="tu@email.com" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Contraseña</mat-label>
+          <input matInput type="password" [(ngModel)]="password" name="password" placeholder="Tu contraseña" />
+        </mat-form-field>
+
+        @if (errorMessage) {
+          <div class="error-message">{{ errorMessage }}</div>
+        }
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button mat-flat-button color="primary" type="submit" class="full-width" [disabled]="loading">
+          {{ loading ? 'Iniciando sesión...' : 'Entrar' }}
+        </button>
+
+        <mat-divider />
+
+        <button mat-stroked-button type="button" class="full-width" (click)="goToRegister()">
+          ¿No tienes cuenta? Regístrate
+        </button>
+      </mat-card-actions>
+    </form>
+  </mat-card>
+</div>

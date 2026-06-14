@@ -1,13 +1,17 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { AuthService } from '../../services/auth.service';
 import { ChatService } from '../../services/chat.service';
 import { Message } from '../../models/message.model';
+import { User } from '../../models/user.model';
 
 // ============================================================
 // ChatComponent - Solo se encarga de la UI
@@ -25,28 +29,58 @@ import { Message } from '../../models/message.model';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatListModule
+    MatListModule,
+    MatToolbarModule
   ],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss'
 })
-export class ChatComponent {
+export class ChatComponent implements OnInit {
   // --------------------------------------------------------
-  // Inyectar ChatService para acceder a los mensajes
+  // Inyectar servicios
   // --------------------------------------------------------
+  private authService = inject(AuthService);
   private chatService = inject(ChatService);
-  messages$ = this.chatService.messages$; // Observable de mensajes
-  newMessage = ''; // Modelo del input de texto
-  username = this.chatService.getUsername(); // Nombre de usuario único
+  private router = inject(Router);
+
+  // --------------------------------------------------------
+  // Datos del componente
+  // --------------------------------------------------------
+  messages$ = this.chatService.messages$;
+  newMessage = '';
+  currentUser: User | null = null;
+
+  // --------------------------------------------------------
+  // Obtener el nombre del usuario autenticado
+  // --------------------------------------------------------
+  get username(): string {
+    return this.currentUser?.displayName || this.currentUser?.email || 'Usuario';
+  }
+
+  ngOnInit(): void {
+    // Obtener el usuario actual de Firebase
+    this.authService.currentUser$.subscribe((user) => {
+      this.currentUser = user;
+    });
+  }
 
   // --------------------------------------------------------
   // Enviar mensaje - llama al service, no hace nada más
   // --------------------------------------------------------
   sendMessage(): void {
-    if (this.newMessage.trim()) {
-      this.chatService.sendMessage(this.newMessage);
-      this.newMessage = ''; // Limpiar input después de enviar
+    if (this.newMessage.trim() && this.currentUser) {
+      this.chatService.sendMessage(this.newMessage, this.currentUser.email);
+      this.newMessage = '';
     }
+  }
+
+  // --------------------------------------------------------
+  // Cerrar sesión
+  // --------------------------------------------------------
+  logout(): void {
+    this.authService.logout().then(() => {
+      this.router.navigate(['/login']);
+    });
   }
 
   // --------------------------------------------------------
