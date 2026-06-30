@@ -69,7 +69,10 @@ export class AuthService {
   // --------------------------------------------------------
   register(email: string, password: string): Promise<FirebaseUser> {
     return createUserWithEmailAndPassword(this.auth, email, password)
-      .then((credential) => credential.user);
+      .then(async (credential) => {
+        await this.syncUser();
+        return credential.user;
+      });
   }
 
   // --------------------------------------------------------
@@ -77,7 +80,34 @@ export class AuthService {
   // --------------------------------------------------------
   login(email: string, password: string): Promise<FirebaseUser> {
     return signInWithEmailAndPassword(this.auth, email, password)
-      .then((credential) => credential.user);
+      .then(async (credential) => {
+        await this.syncUser();
+        return credential.user;
+      });
+  }
+
+  // --------------------------------------------------------
+  // Sincronizar usuario con el backend (MySQL)
+  // Se llama automáticamente después de login/registro
+  // --------------------------------------------------------
+  private async syncUser(): Promise<void> {
+    const idToken = await this.getIdToken();
+    if (!idToken) return;
+
+    try {
+      const response = await fetch('http://localhost:8000/auth/sync', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        }
+      });
+      if (!response.ok) {
+        console.error('Error al sincronizar usuario con backend:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error de red al sincronizar usuario:', error);
+    }
   }
 
   // --------------------------------------------------------

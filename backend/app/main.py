@@ -24,8 +24,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # ============================================================
-# PASO 4 - Endpoints HTTP
+# PASO 4 - Inicializar base de datos
+# Crear tablas al arrancar la aplicación
+# ============================================================
+@app.on_event("startup")
+def on_startup():
+    from app.database.connection import init_db
+    init_db()
+
+
+# ============================================================
+# PASO 5 - Registrar routers
+# ============================================================
+from app.routers.auth import router as auth_router
+app.include_router(auth_router)
+
+
+# ============================================================
+# PASO 6 - Endpoints HTTP
 # ============================================================
 
 @app.get("/health")
@@ -35,7 +53,7 @@ def health():
 
 
 # ============================================================
-# PASO 5 - WebSocket Manager
+# PASO 7 - WebSocket Manager
 # Gestiona las conexiones activas y el broadcast de mensajes
 # ============================================================
 class ConnectionManager:
@@ -60,29 +78,21 @@ class ConnectionManager:
             await connection.send_json(message)
 
 
-# Instancia única del manager (se comparte en toda la app)
 manager = ConnectionManager()
 
 
 # ============================================================
-# PASO 6 - Endpoint WebSocket /ws
+# PASO 8 - Endpoint WebSocket /ws
 # Recibe mensajes de un cliente y los reenvía a todos
 # ============================================================
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
-    # Aceptar la conexión
     await manager.connect(websocket)
     try:
         while True:
-            # 6a. Escuchar mensajes del cliente
             data = await websocket.receive_text()
             message = json.loads(data)
-
-            # 6b. Añadir timestamp con formato día/mes/año
             message["timestamp"] = datetime.now().isoformat()
-
-            # 6c. Reenviar a todos los clientes conectados (incluido el remitente)
             await manager.broadcast(message)
     except Exception:
-        # 6d. Eliminar conexión cuando se cierra o hay error
         manager.disconnect(websocket)

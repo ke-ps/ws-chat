@@ -1,0 +1,16 @@
+# env
+.env
+backend/.env
+frontend/.env
+
+# secrets
+firebase-service-account.json
+backend/firebase-service-account.json
+
+# python
+__pycache__/
+*.pyc
+
+# node
+node_modules/
+dist/
