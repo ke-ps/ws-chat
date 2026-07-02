@@ -1,11 +1,14 @@
 from sqlalchemy.orm import Session
 from app.models.room import Room
-from typing import List
+from typing import List, Optional
 
 class RoomRepository:
 
     def __init__(self, db: Session):
         self.db = db
+
+    def find_by_id(self, room_id: int) -> Optional[Room]:
+        return self.db.query(Room).filter(Room.id == room_id).first()
 
     def find_all(self) -> List[Room]:
         return self.db.query(Room).all()

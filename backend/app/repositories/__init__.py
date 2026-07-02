@@ -1,2 +1,3 @@
 from .user_repository import UserRepository
 from .room_repository import RoomRepository
+from .room_member_repository import RoomMemberRepository

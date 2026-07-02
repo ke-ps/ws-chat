@@ -40,3 +40,49 @@ def list_rooms(db: Session = Depends(get_db)):
         )
         for room in rooms
     ]
+
+
+class AddMemberRequest(BaseModel):
+    user_id: int
+
+class MemberResponse(BaseModel):
+    id: int
+    room_id: int
+    user_id: int
+    joined_at: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+@router.post("/{room_id}/members", response_model=MemberResponse)
+def add_member(room_id: int, body: AddMemberRequest, db: Session = Depends(get_db)):
+    from app.services.room_member_service import RoomMemberService
+    service = RoomMemberService(db)
+    try:
+        member = service.add_member(room_id, body.user_id)
+        return MemberResponse(
+            id=member.id,
+            room_id=member.room_id,
+            user_id=member.user_id,
+            joined_at=member.joined_at.isoformat() if member.joined_at else None
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.get("/{room_id}/members", response_model=list[MemberResponse])
+def list_members(room_id: int, db: Session = Depends(get_db)):
+    from app.services.room_member_service import RoomMemberService
+    service = RoomMemberService(db)
+    try:
+        members = service.get_members(room_id)
+        return [
+            MemberResponse(
+                id=m.id,
+                room_id=m.room_id,
+                user_id=m.user_id,
+                joined_at=m.joined_at.isoformat() if m.joined_at else None
+            )
+            for m in members
+        ]
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))

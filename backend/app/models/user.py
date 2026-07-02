@@ -1,5 +1,6 @@
 from sqlalchemy import Column, String, DateTime, Integer
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 from app.database.connection import Base
 
 
@@ -21,6 +22,8 @@ class User(Base):
     display_name = Column(String(255), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    memberships = relationship("RoomMember", back_populates="user")
 
     def __repr__(self):
         return f"<User(id={self.id}, email={self.email}, firebase_uid={self.firebase_uid})>"

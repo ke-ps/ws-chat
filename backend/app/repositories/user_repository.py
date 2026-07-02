@@ -16,6 +16,10 @@ class UserRepository:
     def __init__(self, db: Session):
         self.db = db
 
+    def find_by_id(self, user_id: int) -> Optional[User]:
+        """Busca un usuario por su id numérico."""
+        return self.db.query(User).filter(User.id == user_id).first()
+
     def find_by_firebase_uid(self, firebase_uid: str) -> Optional[User]:
         """Busca un usuario por su firebase_uid."""
         return self.db.query(User).filter(User.firebase_uid == firebase_uid).first()
