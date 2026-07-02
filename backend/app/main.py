@@ -39,7 +39,9 @@ def on_startup():
 # PASO 5 - Registrar routers
 # ============================================================
 from app.routers.auth import router as auth_router
+from app.routers.rooms import router as rooms_router
 app.include_router(auth_router)
+app.include_router(rooms_router)
 
 
 # ============================================================
