@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, ChangeDetectorRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -8,10 +8,12 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../services/auth.service';
 import { ChatService } from '../../services/chat.service';
 import { Message } from '../../models/message.model';
 import { User } from '../../models/user.model';
+import { Room } from '../../models/room.model';
 
 // ============================================================
 // ChatComponent - Solo se encarga de la UI
@@ -30,7 +32,8 @@ import { User } from '../../models/user.model';
     MatInputModule,
     MatButtonModule,
     MatListModule,
-    MatToolbarModule
+    MatToolbarModule,
+    MatIconModule
   ],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss'
@@ -42,13 +45,18 @@ export class ChatComponent implements OnInit {
   private authService = inject(AuthService);
   private chatService = inject(ChatService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   // --------------------------------------------------------
   // Datos del componente
   // --------------------------------------------------------
   messages$ = this.chatService.messages$;
+  rooms$ = this.chatService.rooms$;
+  selectedRoomId$ = this.chatService.selectedRoomId$;
   newMessage = '';
   currentUser: User | null = null;
+  rooms: Room[] = [];
+  selectedRoomId: number | null = null;
 
   // --------------------------------------------------------
   // Obtener el nombre del usuario autenticado
@@ -58,10 +66,35 @@ export class ChatComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Obtener el usuario actual de Firebase
     this.authService.currentUser$.subscribe((user) => {
       this.currentUser = user;
     });
+
+    this.chatService.rooms$.subscribe((rooms) => {
+      this.rooms = rooms;
+      this.cdr.detectChanges();
+    });
+
+    this.chatService.selectedRoomId$.subscribe((id) => {
+      this.selectedRoomId = id;
+    });
+
+    this.chatService.loadRooms();
+  }
+
+  // --------------------------------------------------------
+  // Obtener nombre de la sala seleccionada
+  // --------------------------------------------------------
+  get selectedRoomName(): string {
+    const room = this.rooms.find(r => r.id === this.selectedRoomId);
+    return room?.name || '';
+  }
+
+  // --------------------------------------------------------
+  // Seleccionar una sala
+  // --------------------------------------------------------
+  selectRoom(roomId: number): void {
+    this.chatService.selectRoom(roomId);
   }
 
   // --------------------------------------------------------

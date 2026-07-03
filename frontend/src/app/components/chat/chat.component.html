@@ -3,28 +3,55 @@
   <mat-toolbar color="primary" class="chat-toolbar">
     <span class="user-info">Conectado como: {{ username }}</span>
     <span class="spacer"></span>
+    @if (selectedRoomId) {
+      <span class="room-indicator">Sala: {{ selectedRoomName }}</span>
+      <span class="spacer"></span>
+    }
     <button mat-stroked-button (click)="logout()">
       Salir
     </button>
   </mat-toolbar>
 
-  <mat-card class="chat-container">
-    <mat-card-content class="messages-list">
-      @for (message of messages$ | async; track trackByMessageId($index, message)) {
-        <div class="message" [class.mine]="message.sender === username">
-          <span class="sender">{{ message.sender }}</span>
-          <span class="content">{{ message.content }}</span>
-          <span class="timestamp">{{ message.timestamp | date:'dd/MM/yyyy HH:mm' }}</span>
-        </div>
+  <div class="chat-layout">
+    <!-- Sidebar de salas -->
+    <mat-nav-list class="room-sidebar">
+      <div class="sidebar-header">Salas</div>
+      @for (room of rooms; track room.id) {
+        <mat-list-item
+          class="room-item"
+          [class.active]="room.id === selectedRoomId"
+          (click)="selectRoom(room.id)">
+          <mat-icon matListItemIcon>chat</mat-icon>
+          <span>{{ room.name }}</span>
+        </mat-list-item>
       }
-    </mat-card-content>
+    </mat-nav-list>
 
-    <mat-card-actions class="input-area">
-      <mat-form-field appearance="outline" class="message-input">
-        <mat-label>Mensaje</mat-label>
-        <input matInput [(ngModel)]="newMessage" (keyup.enter)="sendMessage()" placeholder="Escribe un mensaje..." />
-      </mat-form-field>
-      <button mat-flat-button color="primary" (click)="sendMessage()">Enviar</button>
-    </mat-card-actions>
-  </mat-card>
+    <!-- Chat -->
+    <mat-card class="chat-container">
+      @if (!selectedRoomId) {
+        <div class="no-room-selected">
+          <p>Selecciona una sala para empezar a chatear</p>
+        </div>
+      } @else {
+        <mat-card-content class="messages-list">
+          @for (message of messages$ | async; track trackByMessageId($index, message)) {
+            <div class="message" [class.mine]="message.sender === username">
+              <span class="sender">{{ message.sender }}</span>
+              <span class="content">{{ message.content }}</span>
+              <span class="timestamp">{{ message.timestamp | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+          }
+        </mat-card-content>
+
+        <mat-card-actions class="input-area">
+          <mat-form-field appearance="outline" class="message-input">
+            <mat-label>Mensaje</mat-label>
+            <input matInput [(ngModel)]="newMessage" (keyup.enter)="sendMessage()" placeholder="Escribe un mensaje..." />
+          </mat-form-field>
+          <button mat-flat-button color="primary" (click)="sendMessage()">Enviar</button>
+        </mat-card-actions>
+      }
+    </mat-card>
+  </div>
 </div>

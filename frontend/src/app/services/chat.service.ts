@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Message } from '../models/message.model';
+import { Room } from '../models/room.model';
 
 // ============================================================
 // ORDEN DE EJECUCIÓN - Cómo funciona el chat:
@@ -28,22 +29,54 @@ export class ChatService {
   messages$: Observable<Message[]> = this.messagesSubject.asObservable();
 
   // --------------------------------------------------------
-  // PASO 2 - Configuración WebSocket
-  // El sender ahora viene del componente (email del usuario Firebase)
+  // PASO 2 - Salas
+  // --------------------------------------------------------
+  private roomsSubject = new BehaviorSubject<Room[]>([]);
+  rooms$: Observable<Room[]> = this.roomsSubject.asObservable();
+
+  private selectedRoomIdSubject = new BehaviorSubject<number | null>(null);
+  selectedRoomId$: Observable<number | null> = this.selectedRoomIdSubject.asObservable();
+
+  // --------------------------------------------------------
+  // PASO 3 - Configuración WebSocket
   // --------------------------------------------------------
   private ws: WebSocket | null = null;
-  private wsUrl = 'ws://localhost:8000/ws/1';
+  private wsUrl = '';
   private useWebSocket = true;
 
   constructor() {
-    // Se conecta automáticamente al backend al iniciar
-    if (this.useWebSocket) {
-      this.connectWebSocket();
+    // No auto-conectar - esperar a que el usuario seleccione una sala
+  }
+
+  // --------------------------------------------------------
+  // Cargar salas desde el backend
+  // --------------------------------------------------------
+  async loadRooms(): Promise<void> {
+    try {
+      const response = await fetch('http://localhost:8000/rooms');
+      const rooms: Room[] = await response.json();
+      this.roomsSubject.next(rooms);
+    } catch (error) {
+      console.error('Error al cargar salas:', error);
     }
   }
 
   // --------------------------------------------------------
-  // PASO 3 - Enviar mensaje
+  // Seleccionar una sala y conectar WebSocket
+  // --------------------------------------------------------
+  selectRoom(roomId: number): void {
+    if (this.selectedRoomIdSubject.getValue() === roomId && this.ws) {
+      return;
+    }
+    this.disconnectWebSocket();
+    this.messagesSubject.next([]);
+    this.selectedRoomIdSubject.next(roomId);
+    this.wsUrl = `ws://localhost:8000/ws/${roomId}`;
+    this.connectWebSocket();
+  }
+
+  // --------------------------------------------------------
+  // PASO 4 - Enviar mensaje
   // sender = email del usuario autenticado con Firebase
   // --------------------------------------------------------
   sendMessage(content: string, sender: string): void {
@@ -54,60 +87,57 @@ export class ChatService {
       timestamp: new Date()
     };
 
-    // 3a. Actualizar la lista local (esto refresca la UI automaticamente)
     const currentMessages = this.messagesSubject.getValue();
     this.messagesSubject.next([...currentMessages, message]);
 
-    // 3b. Enviar al servidor WebSocket para broadcast (incluye id para deduplicar)
     if (this.useWebSocket && this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify({ id: message.id, content, sender }));
     }
   }
 
   // --------------------------------------------------------
-  // PASO 4 - Conectar al servidor WebSocket
+  // PASO 5 - Conectar al servidor WebSocket
   // --------------------------------------------------------
-  connectWebSocket(): void {
-    if (this.useWebSocket && !this.ws) {
-      this.ws = new WebSocket(this.wsUrl);
-
-      // 4a. Cuando la conexión se establece
-      this.ws.onopen = () => {
-        console.log('WebSocket conectado');
-      };
-
-      // 4b. Cuando llega un mensaje del servidor (broadcast de otro cliente o eco del nuestro)
-      this.ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        const message: Message = {
-          id: data.id || crypto.randomUUID(),
-          content: data.content,
-          sender: data.sender,
-          timestamp: new Date(data.timestamp)
-        };
-        // Ignorar si el mensaje ya existe (evita duplicado del emisor)
-        const currentMessages = this.messagesSubject.getValue();
-        const exists = currentMessages.some(m => m.id === message.id);
-        if (!exists) {
-          this.messagesSubject.next([...currentMessages, message]);
-        }
-      };
-
-      // 4c. Manejo de errores
-      this.ws.onerror = (error) => {
-        console.error('Error WebSocket:', error);
-      };
-
-      // 4d. Cuando se cierra la conexión
-      this.ws.onclose = () => {
-        console.log('WebSocket desconectado');
-        this.ws = null;
-      };
+  private connectWebSocket(): void {
+    if (!this.useWebSocket || !this.wsUrl || this.ws) {
+      return;
     }
+    const ws = new WebSocket(this.wsUrl);
+    this.ws = ws;
+
+    ws.onopen = () => {
+      console.log('WebSocket conectado a sala', this.selectedRoomIdSubject.getValue());
+    };
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      const message: Message = {
+        id: data.id || crypto.randomUUID(),
+        content: data.content,
+        sender: data.sender,
+        timestamp: new Date(data.timestamp)
+      };
+      const currentMessages = this.messagesSubject.getValue();
+      const exists = currentMessages.some(m => m.id === message.id);
+      if (!exists) {
+        this.messagesSubject.next([...currentMessages, message]);
+      }
+    };
+
+    ws.onerror = (error) => {
+      console.error('Error WebSocket:', error);
+    };
+
+    ws.onclose = () => {
+      console.log('WebSocket desconectado');
+      if (this.ws === ws) {
+        this.ws = null;
+      }
+    };
   }
 
   // --------------------------------------------------------
-  // PASO 5 - Desconectar (para limpiar recursos)
+  // PASO 6 - Desconectar
   // --------------------------------------------------------
   disconnectWebSocket(): void {
     if (this.ws) {

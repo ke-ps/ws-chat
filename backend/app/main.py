@@ -110,7 +110,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: int):
 
     await manager.connect(websocket, room_id)
     try:
-        while True:
+      while True:
             data = await websocket.receive_text()
             message = json.loads(data)
             message["room_id"] = room_id
