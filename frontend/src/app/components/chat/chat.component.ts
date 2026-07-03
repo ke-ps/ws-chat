@@ -57,6 +57,9 @@ export class ChatComponent implements OnInit {
   currentUser: User | null = null;
   rooms: Room[] = [];
   selectedRoomId: number | null = null;
+  newRoomName = '';
+  roomError = '';
+  creatingRoom = false;
 
   // --------------------------------------------------------
   // Obtener el nombre del usuario autenticado
@@ -95,6 +98,30 @@ export class ChatComponent implements OnInit {
   // --------------------------------------------------------
   selectRoom(roomId: number): void {
     this.chatService.selectRoom(roomId);
+  }
+
+  // --------------------------------------------------------
+  // Crear sala
+  // --------------------------------------------------------
+  async createRoom(): Promise<void> {
+    const name = this.newRoomName.trim();
+    this.roomError = '';
+
+    if (!name) {
+      this.roomError = 'El nombre de la sala no puede estar vacío';
+      return;
+    }
+
+    this.creatingRoom = true;
+    try {
+      const room = await this.chatService.createRoom(name);
+      this.newRoomName = '';
+      this.chatService.selectRoom(room.id);
+    } catch (error: any) {
+      this.roomError = error.message || 'Error al crear la sala';
+    } finally {
+      this.creatingRoom = false;
+    }
   }
 
   // --------------------------------------------------------

@@ -62,6 +62,26 @@ export class ChatService {
   }
 
   // --------------------------------------------------------
+  // Crear una sala nueva en el backend
+  // --------------------------------------------------------
+  async createRoom(name: string): Promise<Room> {
+    const response = await fetch('http://localhost:8000/rooms', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name })
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => null);
+      throw new Error(error?.detail || 'Error al crear la sala');
+    }
+
+    const room: Room = await response.json();
+    await this.loadRooms();
+    return room;
+  }
+
+  // --------------------------------------------------------
   // Seleccionar una sala y conectar WebSocket
   // --------------------------------------------------------
   selectRoom(roomId: number): void {

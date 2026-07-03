@@ -16,6 +16,20 @@
     <!-- Sidebar de salas -->
     <mat-nav-list class="room-sidebar">
       <div class="sidebar-header">Salas</div>
+
+      <div class="create-room-form">
+        <mat-form-field appearance="outline" class="create-room-input">
+          <mat-label>Nueva sala</mat-label>
+          <input matInput [(ngModel)]="newRoomName" (keyup.enter)="createRoom()" placeholder="Nombre de la sala" [disabled]="creatingRoom" />
+        </mat-form-field>
+        <button mat-flat-button color="primary" (click)="createRoom()" [disabled]="creatingRoom || !newRoomName.trim()">
+          {{ creatingRoom ? 'Creando...' : 'Crear' }}
+        </button>
+        @if (roomError) {
+          <div class="room-error">{{ roomError }}</div>
+        }
+      </div>
+
       @for (room of rooms; track room.id) {
         <mat-list-item
           class="room-item"

@@ -10,162 +10,201 @@ Estado del proyecto: 🟡 En desarrollo
 
 - [x] Backend FastAPI
 - [x] Estructura del proyecto
-- [x] Configuración SQLAlchemy
-- [x] Configuración MySQL (Aiven)
+- [x] SQLAlchemy
+- [x] MySQL
 - [x] CORS
 - [x] Health Check
 
 ---
 
-# Fase 2 — Frontend ✅
+# Fase 2 — Frontend y autenticación ✅
 
 - [x] Angular
 - [x] Angular Material
 - [x] Routing
+- [x] Firebase Authentication
 - [x] Login
 - [x] Registro
-
----
-
-# Fase 3 — Firebase Authentication ✅
-
-- [x] Registro
-- [x] Login
 - [x] Logout
 - [x] Guards
 - [x] Sincronización Firebase → Backend
-- [x] Persistencia de usuarios en MySQL
+- [x] Persistencia de usuarios
 
 ---
 
-# Fase 4 — Chat en tiempo real ✅
+# Fase 3 — Chat en tiempo real ✅
 
 - [x] WebSocket
 - [x] Envío de mensajes
 - [x] Recepción de mensajes
 - [x] Broadcast
-- [x] Autenticación mediante Firebase Admin SDK
-- [x] Sincronización de usuarios
+- [x] Firebase Admin SDK
+
+---
+
+# Fase 4 — Arquitectura y refactorización ✅
+
+- [x] Repository Pattern
+- [x] Service Layer
+- [x] Separación de responsabilidades
+- [x] Organización del proyecto
 
 ---
 
 # Fase 5 — Sistema de salas
 
-## 5.1 Crear salas ✅
+## 5.1 Backend de salas ✅
 
 - [x] Modelo Room
 - [x] Repository
 - [x] Service
 - [x] Router
-- [x] Persistencia en MySQL
+- [x] Persistencia
 
-## 5.2 Participantes de una sala ⏳
+## 5.2 Participantes ✅
 
-- [ ] Tabla RoomParticipant
-- [ ] Relación Room ↔ User
-- [ ] Añadir participante
-- [ ] Obtener participantes
+- [x] Tabla RoomMember
+- [x] Añadir miembro
+- [x] Listar miembros
 
-## 5.3 Unirse a una sala
+## 5.3 WebSocket por sala ✅
 
-- [ ] Endpoint Join Room
-- [ ] Validaciones
-- [ ] Evitar duplicados
+- [x] Endpoint /ws/{room_id}
+- [x] Validar sala
+- [x] Broadcast por sala
 
-## 5.4 Abandonar una sala
+## 5.4 Frontend de salas ✅
 
-- [ ] Endpoint Leave Room
+- [x] Listar salas
+- [x] Cambio dinámico de sala
+- [x] Reconexión WebSocket
+- [x] Corrección de cambio de sala
 
-## 5.5 Listado de salas del usuario
-
-- [ ] Obtener únicamente las salas donde participa
-
----
-
-# Fase 6 — Mensajes persistentes
-
-## 6.1 Modelo Message
-
-- [ ] Tabla Message
-- [ ] Relaciones
-
-## 6.2 Persistencia
-
-- [ ] Guardar mensajes
-- [ ] Leer historial
-
-## 6.3 Historial
-
-- [ ] Cargar últimos mensajes al entrar
-
----
-
-# Fase 7 — WebSocket por salas
-
-- [ ] Conexión por sala
-- [ ] Broadcast únicamente a participantes
-- [ ] Gestión de conexiones
-
----
-
-# Fase 8 — Invitaciones
-
-- [ ] Invitar usuario
-- [ ] Aceptar invitación
-- [ ] Rechazar invitación
-
----
-
-# Fase 9 — Chat privado
-
-- [ ] Conversaciones privadas
-- [ ] Reutilizar sistema de salas
-
----
-
-# Fase 10 — IA como participante
-
-## 10.1 Participante especial
-
-- [ ] Crear usuario IA
-- [ ] Permitir añadir IA a una sala
-
-## 10.2 Menciones
-
-- [ ] Detectar @IA
-- [ ] Invocar IA únicamente cuando sea mencionada
-
-## 10.3 Respuesta
-
-- [ ] Guardar respuesta
-- [ ] Enviar respuesta por WebSocket
-
----
-
-# Fase 11 — Frontend de salas
+## 5.5 Gestión de salas desde el frontend
 
 - [ ] Crear sala
-- [ ] Listar salas
-- [ ] Entrar a sala
-- [ ] Añadir participantes
-- [ ] Lista de participantes
+- [ ] Entrar automáticamente en la nueva sala
+- [ ] Actualizar listado
+- [ ] Validaciones
+
+## 5.6 Persistencia de mensajes
+
+- [ ] Modelo Message
+- [ ] Guardar mensajes
+- [ ] Cargar historial por sala
+- [ ] Ordenar por fecha
+- [ ] Mostrar historial al entrar
 
 ---
 
-# Fase 12 — Mejoras
+# Fase 6 — Funcionalidades del chat
 
+## 6.1 Usuarios conectados
+
+- [ ] Mostrar usuarios conectados por sala
+
+## 6.2 Indicador de escritura
+
+- [ ] "Usuario está escribiendo..."
+
+## 6.3 Estado del WebSocket
+
+- [ ] Conectando
+- [ ] Conectado
+- [ ] Desconectado
+- [ ] Reconectando
+
+## 6.4 Reconexión automática
+
+- [ ] Reconectar automáticamente si se pierde la conexión
+
+---
+
+# Fase 7 — Diseño (UI/UX)
+
+## Sidebar
+
+- [ ] Mejorar listado de salas
+- [ ] Iconos
+- [ ] Avatar
+
+## Chat
+
+- [ ] Burbujas de mensajes
+- [ ] Mejor scroll
+- [ ] Hora de mensajes
+- [ ] Responsive
+
+## Apariencia
+
+- [ ] Tema moderno
+- [ ] Tema oscuro (opcional)
+- [ ] Animaciones básicas
+
+---
+
+# Fase 8 — IA General
+
+## 8.1 Asistente global
+
+- [ ] Crear usuario IA
+- [ ] Detectar mensajes que comiencen por @ia
+- [ ] Enviar consulta al modelo
+- [ ] Publicar la respuesta como un mensaje más del chat
+
+## 8.2 Servicio IA
+
+- [ ] ai_service.py
+- [ ] Configuración del proveedor de IA
+- [ ] Variables de entorno
+- [ ] Manejo de errores
+
+---
+
+# Fase 9 — IA especializada (RAG)
+
+## 9.1 Salas IA
+
+- [ ] Añadir tipo de sala (normal / ai)
+
+## 9.2 Ingesta documental
+
+- [ ] Subir documentación
+- [ ] Dividir documentos en chunks
+- [ ] Generar embeddings
+
+## 9.3 Base vectorial
+
+- [ ] Almacenar embeddings
+- [ ] Recuperar contexto
+
+## 9.4 Servicio RAG
+
+- [ ] rag_service.py
+- [ ] Buscar contexto relevante
+- [ ] Construir prompt
+- [ ] Generar respuesta
+
+## 9.5 Chat RAG
+
+- [ ] La IA responde únicamente usando la documentación disponible
+- [ ] Si no encuentra contexto, indicar que no dispone de información
+
+---
+
+# Ideas futuras (Fuera del alcance actual)
+
+- [ ] Chat privado
+- [ ] Invitaciones
 - [ ] Roles
 - [ ] Administradores
-- [ ] Avatar
-- [ ] Estados online
-- [ ] Escribiendo...
 - [ ] Reacciones
 - [ ] Adjuntos
 - [ ] Notificaciones
-- [ ] Búsqueda
+- [ ] Docker
+- [ ] CI/CD
+- [ ] Despliegue
 - [ ] Tests
-
----
 
 # Convenciones
 
@@ -181,12 +220,4 @@ Cada nueva funcionalidad debe cumplir:
 
 # Flujo de desarrollo
 
-1. Crear rama desde `fullstack`.
-2. Implementar una única fase.
-3. Probar manualmente.
-4. Commit.
-5. Merge a `fullstack`.
-6. Push de `fullstack`.
-7. Push de la rama de la fase.
-8. Eliminar la rama local.
-9. Actualizar este archivo marcando la fase como completada.
+1.Actualizar este archivo marcando la fase como completada.
