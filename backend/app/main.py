@@ -1,9 +1,9 @@
 # ============================================================
 # PASO 1 - Imports
 # ============================================================
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List
+from typing import List, Dict
 import json
 from datetime import datetime
 
@@ -56,45 +56,67 @@ def health():
 
 # ============================================================
 # PASO 7 - WebSocket Manager
-# Gestiona las conexiones activas y el broadcast de mensajes
+# Gestiona las conexiones WebSocket agrupadas por sala
 # ============================================================
 class ConnectionManager:
-    """Administra las conexiones WebSocket activas."""
+    """Administra las conexiones WebSocket activas, agrupadas por sala."""
 
     def __init__(self):
-        self.active_connections: List[WebSocket] = []
+        self.rooms: Dict[int, List[WebSocket]] = {}
 
-    async def connect(self, websocket: WebSocket):
-        """Acepta una nueva conexión WebSocket."""
+    async def connect(self, websocket: WebSocket, room_id: int):
+        """Acepta una nueva conexión WebSocket y la asigna a una sala."""
         await websocket.accept()
-        self.active_connections.append(websocket)
+        if room_id not in self.rooms:
+            self.rooms[room_id] = []
+        self.rooms[room_id].append(websocket)
 
-    def disconnect(self, websocket: WebSocket):
-        """Elimina una conexión WebSocket cerrada."""
-        if websocket in self.active_connections:
-            self.active_connections.remove(websocket)
+    def disconnect(self, websocket: WebSocket, room_id: int):
+        """Elimina una conexión WebSocket de su sala."""
+        if room_id in self.rooms:
+            if websocket in self.rooms[room_id]:
+                self.rooms[room_id].remove(websocket)
+            if not self.rooms[room_id]:
+                del self.rooms[room_id]
 
-    async def broadcast(self, message: dict):
-        """Envía un mensaje a TODOS los clientes conectados."""
-        for connection in self.active_connections:
-            await connection.send_json(message)
+    async def broadcast(self, message: dict, room_id: int):
+        """Envía un mensaje a todos los clientes conectados a una sala."""
+        if room_id in self.rooms:
+            for connection in self.rooms[room_id]:
+                await connection.send_json(message)
 
 
 manager = ConnectionManager()
 
 
 # ============================================================
-# PASO 8 - Endpoint WebSocket /ws
-# Recibe mensajes de un cliente y los reenvía a todos
+# PASO 8 - Endpoint WebSocket /ws/{room_id}
+# Conecta a un cliente a una sala específica
 # ============================================================
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await manager.connect(websocket)
+@app.websocket("/ws/{room_id}")
+async def websocket_endpoint(websocket: WebSocket, room_id: int):
+    from app.database.connection import SessionLocal
+    from app.services.room_service import RoomService
+
+    db = SessionLocal()
+    try:
+        service = RoomService(db)
+        room = service.get_room_by_id(room_id)
+        if not room:
+            await websocket.close(code=4004, reason="Room not found")
+            return
+    finally:
+        db.close()
+
+    await manager.connect(websocket, room_id)
     try:
         while True:
             data = await websocket.receive_text()
             message = json.loads(data)
+            message["room_id"] = room_id
             message["timestamp"] = datetime.now().isoformat()
-            await manager.broadcast(message)
+            await manager.broadcast(message, room_id)
+    except WebSocketDisconnect:
+        manager.disconnect(websocket, room_id)
     except Exception:
-        manager.disconnect(websocket)
+        manager.disconnect(websocket, room_id)

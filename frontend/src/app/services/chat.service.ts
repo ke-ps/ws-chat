@@ -32,7 +32,7 @@ export class ChatService {
   // El sender ahora viene del componente (email del usuario Firebase)
   // --------------------------------------------------------
   private ws: WebSocket | null = null;
-  private wsUrl = 'ws://localhost:8000/ws';
+  private wsUrl = 'ws://localhost:8000/ws/1';
   private useWebSocket = true;
 
   constructor() {
