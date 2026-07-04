@@ -39,6 +39,13 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   currentUser$: Observable<User | null> = this.currentUserSubject.asObservable();
 
+  // --------------------------------------------------------
+  // Estado de inicialización de la autenticación
+  // Se resuelve cuando Firebase termina de restaurar la sesión
+  // --------------------------------------------------------
+  private authInitializedSubject = new BehaviorSubject<boolean>(false);
+  authInitialized$: Observable<boolean> = this.authInitializedSubject.asObservable();
+
   constructor() {
     // Escuchar cambios de estado de autenticación
     // Se ejecuta cada vez que un usuario inicia o cierra sesión
@@ -52,6 +59,9 @@ export class AuthService {
         this.currentUserSubject.next(user);
       } else {
         this.currentUserSubject.next(null);
+      }
+      if (!this.authInitializedSubject.getValue()) {
+        this.authInitializedSubject.next(true);
       }
     });
   }
@@ -92,6 +102,7 @@ export class AuthService {
   // --------------------------------------------------------
   private async syncUser(): Promise<void> {
     const idToken = await this.getIdToken();
+
     if (!idToken) return;
 
     try {
@@ -102,8 +113,8 @@ export class AuthService {
           'Authorization': `Bearer ${idToken}`
         }
       });
-      if (!response.ok) {
-        console.error('Error al sincronizar usuario con backend:', response.statusText);
+     if (!response.ok) {
+      console.error(`Error al sincronizar usuario con backend (${response.status})`);
       }
     } catch (error) {
       console.error('Error de red al sincronizar usuario:', error);
