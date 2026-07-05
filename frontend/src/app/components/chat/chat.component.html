@@ -48,6 +48,17 @@
           <p>Selecciona una sala para empezar a chatear</p>
         </div>
       } @else {
+        <div class="connected-users">
+          <mat-icon class="users-icon">people</mat-icon>
+          <span class="users-label">Conectados:</span>
+          @for (user of connectedUsers$ | async; track user) {
+            <span class="user-chip">{{ user }}</span>
+          }
+          @if ((connectedUsers$ | async)?.length === 0) {
+            <span class="user-chip empty">Solo tú</span>
+          }
+        </div>
+
         <mat-card-content class="messages-list">
           @for (message of messages$ | async; track trackByMessageId($index, message)) {
             <div class="message" [class.mine]="message.sender === username">

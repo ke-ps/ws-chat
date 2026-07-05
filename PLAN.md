@@ -82,17 +82,17 @@ Estado del proyecto: 🟡 En desarrollo
 
 ## 5.5 Gestión de salas desde el frontend
 
-- [ ] Crear sala
-- [ ] Entrar automáticamente en la nueva sala
-- [ ] Actualizar listado
-- [ ] Validaciones
+- [x] Crear sala
+- [x] Entrar automáticamente en la nueva sala
+- [x] Actualizar listado
+- [x] Validaciones
 
 ## 5.6 Persistencia de mensajes
 
-- [ ] Modelo Message
-- [ ] Guardar mensajes
-- [ ] Cargar historial por sala
-- [ ] Ordenar por fecha
+- [x] Modelo Message
+- [x] Guardar mensajes
+- [x] Cargar historial por sala
+- [x] Ordenar por fecha
 - [ ] Mostrar historial al entrar
 
 ---

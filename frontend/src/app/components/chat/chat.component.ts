@@ -53,6 +53,7 @@ export class ChatComponent implements OnInit {
   messages$ = this.chatService.messages$;
   rooms$ = this.chatService.rooms$;
   selectedRoomId$ = this.chatService.selectedRoomId$;
+  connectedUsers$ = this.chatService.connectedUsers$;
   selectedRoomName$ = combineLatest([this.rooms$, this.selectedRoomId$]).pipe(
     map(([rooms, id]) => rooms.find(r => r.id === id)?.name || '')
   );
@@ -72,6 +73,10 @@ export class ChatComponent implements OnInit {
   ngOnInit(): void {
     this.authService.currentUser$.subscribe((user) => {
       this.currentUser = user;
+      if (user) {
+        this.chatService.setUserEmail(user.email);
+        this.chatService.setUserDisplayName(user.displayName || user.email);
+      }
     });
 
     this.chatService.loadRooms();

@@ -42,14 +42,33 @@ export class ChatService {
   selectedRoomId$: Observable<number | null> = this.selectedRoomIdSubject.asObservable();
 
   // --------------------------------------------------------
+  // PASO 2b - Usuarios conectados en tiempo real
+  // --------------------------------------------------------
+  private connectedUsersSubject = new BehaviorSubject<string[]>([]);
+  connectedUsers$: Observable<string[]> = this.connectedUsersSubject.asObservable();
+
+  // --------------------------------------------------------
   // PASO 3 - Configuración WebSocket
   // --------------------------------------------------------
   private ws: WebSocket | null = null;
   private wsUrl = '';
   private useWebSocket = true;
+  private userEmail = '';
+  private userDisplayName = '';
 
   constructor() {
     // No auto-conectar - esperar a que el usuario seleccione una sala
+  }
+
+  // --------------------------------------------------------
+  // Establecer datos del usuario para la conexión WebSocket
+  // --------------------------------------------------------
+  setUserEmail(email: string): void {
+    this.userEmail = email;
+  }
+
+  setUserDisplayName(displayName: string): void {
+    this.userDisplayName = displayName;
   }
 
   // --------------------------------------------------------
@@ -104,6 +123,7 @@ export class ChatService {
     }
     this.disconnectWebSocket();
     this.messagesSubject.next([]);
+    this.connectedUsersSubject.next([]);
     this.selectedRoomIdSubject.next(roomId);
     await this.loadMessages(roomId);
     this.wsUrl = `ws://localhost:8000/ws/${roomId}`;
@@ -137,7 +157,12 @@ export class ChatService {
     if (!this.useWebSocket || !this.wsUrl || this.ws) {
       return;
     }
-    const ws = new WebSocket(this.wsUrl);
+    const params = new URLSearchParams({
+      email: this.userEmail,
+      displayName: this.userDisplayName,
+    });
+    const url = `${this.wsUrl}?${params.toString()}`;
+    const ws = new WebSocket(url);
     this.ws = ws;
 
     ws.onopen = () => {
@@ -146,6 +171,12 @@ export class ChatService {
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
+
+      if (data.type === 'user_list') {
+        this.connectedUsersSubject.next(data.users);
+        return;
+      }
+
       const message: Message = {
         id: data.id || crypto.randomUUID(),
         content: data.content,
