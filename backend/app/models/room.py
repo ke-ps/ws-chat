@@ -11,6 +11,7 @@ class Room(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     members = relationship("RoomMember", back_populates="room")
+    messages = relationship("Message", back_populates="room")
 
     def __repr__(self):
         return f"<Room(id={self.id}, name={self.name})>"

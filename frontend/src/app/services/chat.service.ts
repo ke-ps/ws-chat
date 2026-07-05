@@ -1,5 +1,6 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { Message } from '../models/message.model';
 import { Room } from '../models/room.model';
 
@@ -21,6 +22,9 @@ import { Room } from '../models/room.model';
   providedIn: 'root'
 })
 export class ChatService {
+  private http = inject(HttpClient);
+  private apiUrl = 'http://localhost:8000';
+
   // --------------------------------------------------------
   // PASO 1 - BehaviorSubject: almacena la lista de mensajes
   // Observable público para que el componente se suscriba
@@ -53,8 +57,7 @@ export class ChatService {
   // --------------------------------------------------------
   async loadRooms(): Promise<void> {
     try {
-      const response = await fetch('http://localhost:8000/rooms');
-      const rooms: Room[] = await response.json();
+      const rooms = await firstValueFrom(this.http.get<Room[]>(`${this.apiUrl}/rooms`));
       this.roomsSubject.next(rooms);
     } catch (error) {
       console.error('Error al cargar salas:', error);
@@ -65,32 +68,44 @@ export class ChatService {
   // Crear una sala nueva en el backend
   // --------------------------------------------------------
   async createRoom(name: string): Promise<Room> {
-    const response = await fetch('http://localhost:8000/rooms', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name })
-    });
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => null);
-      throw new Error(error?.detail || 'Error al crear la sala');
-    }
-
-    const room: Room = await response.json();
+    const room = await firstValueFrom(
+      this.http.post<Room>(`${this.apiUrl}/rooms`, { name })
+    );
     await this.loadRooms();
     return room;
   }
 
   // --------------------------------------------------------
+  // Cargar historial de mensajes de una sala
+  // --------------------------------------------------------
+  private async loadMessages(roomId: number): Promise<void> {
+    try {
+      const data = await firstValueFrom(
+        this.http.get<any[]>(`${this.apiUrl}/rooms/${roomId}/messages`)
+      );
+      const messages: Message[] = data.map((m) => ({
+        id: String(m.id),
+        content: m.content,
+        sender: m.user_email || String(m.user_id),
+        timestamp: new Date(m.created_at)
+      }));
+      this.messagesSubject.next(messages);
+    } catch (error) {
+      console.error('Error al cargar mensajes:', error);
+    }
+  }
+
+  // --------------------------------------------------------
   // Seleccionar una sala y conectar WebSocket
   // --------------------------------------------------------
-  selectRoom(roomId: number): void {
+  async selectRoom(roomId: number): Promise<void> {
     if (this.selectedRoomIdSubject.getValue() === roomId && this.ws) {
       return;
     }
     this.disconnectWebSocket();
     this.messagesSubject.next([]);
     this.selectedRoomIdSubject.next(roomId);
+    await this.loadMessages(roomId);
     this.wsUrl = `ws://localhost:8000/ws/${roomId}`;
     this.connectWebSocket();
   }

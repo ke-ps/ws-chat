@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectorRef, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -9,11 +9,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
+import { combineLatest } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { AuthService } from '../../services/auth.service';
 import { ChatService } from '../../services/chat.service';
 import { Message } from '../../models/message.model';
 import { User } from '../../models/user.model';
-import { Room } from '../../models/room.model';
 
 // ============================================================
 // ChatComponent - Solo se encarga de la UI
@@ -45,7 +46,6 @@ export class ChatComponent implements OnInit {
   private authService = inject(AuthService);
   private chatService = inject(ChatService);
   private router = inject(Router);
-  private cdr = inject(ChangeDetectorRef);
 
   // --------------------------------------------------------
   // Datos del componente
@@ -53,10 +53,11 @@ export class ChatComponent implements OnInit {
   messages$ = this.chatService.messages$;
   rooms$ = this.chatService.rooms$;
   selectedRoomId$ = this.chatService.selectedRoomId$;
+  selectedRoomName$ = combineLatest([this.rooms$, this.selectedRoomId$]).pipe(
+    map(([rooms, id]) => rooms.find(r => r.id === id)?.name || '')
+  );
   newMessage = '';
   currentUser: User | null = null;
-  rooms: Room[] = [];
-  selectedRoomId: number | null = null;
   newRoomName = '';
   roomError = '';
   creatingRoom = false;
@@ -73,24 +74,7 @@ export class ChatComponent implements OnInit {
       this.currentUser = user;
     });
 
-    this.chatService.rooms$.subscribe((rooms) => {
-      this.rooms = rooms;
-      this.cdr.detectChanges();
-    });
-
-    this.chatService.selectedRoomId$.subscribe((id) => {
-      this.selectedRoomId = id;
-    });
-
     this.chatService.loadRooms();
-  }
-
-  // --------------------------------------------------------
-  // Obtener nombre de la sala seleccionada
-  // --------------------------------------------------------
-  get selectedRoomName(): string {
-    const room = this.rooms.find(r => r.id === this.selectedRoomId);
-    return room?.name || '';
   }
 
   // --------------------------------------------------------

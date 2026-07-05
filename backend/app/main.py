@@ -97,6 +97,8 @@ manager = ConnectionManager()
 async def websocket_endpoint(websocket: WebSocket, room_id: int):
     from app.database.connection import SessionLocal
     from app.services.room_service import RoomService
+    from app.services.message_service import MessageService
+    from app.repositories.user_repository import UserRepository
 
     db = SessionLocal()
     try:
@@ -105,6 +107,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: int):
         if not room:
             await websocket.close(code=4004, reason="Room not found")
             return
+        user_repo = UserRepository(db)
     finally:
         db.close()
 
@@ -115,6 +118,22 @@ async def websocket_endpoint(websocket: WebSocket, room_id: int):
             message = json.loads(data)
             message["room_id"] = room_id
             message["timestamp"] = datetime.now().isoformat()
+
+            # Persist message in database
+            sender_email = message.get("sender", "")
+            user = user_repo.find_by_email(sender_email) if sender_email else None
+            if user:
+                db = SessionLocal()
+                try:
+                    msg_service = MessageService(db)
+                    msg_service.send_message(
+                        room_id=room_id,
+                        user_id=user.id,
+                        content=message.get("content", "")
+                    )
+                finally:
+                    db.close()
+
             await manager.broadcast(message, room_id)
     except WebSocketDisconnect:
         manager.disconnect(websocket, room_id)

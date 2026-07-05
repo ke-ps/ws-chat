@@ -3,8 +3,8 @@
   <mat-toolbar color="primary" class="chat-toolbar">
     <span class="user-info">Conectado como: {{ username }}</span>
     <span class="spacer"></span>
-    @if (selectedRoomId) {
-      <span class="room-indicator">Sala: {{ selectedRoomName }}</span>
+    @if (selectedRoomId$ | async) {
+      <span class="room-indicator">Sala: {{ selectedRoomName$ | async }}</span>
       <span class="spacer"></span>
     }
     <button mat-stroked-button (click)="logout()">
@@ -30,10 +30,10 @@
         }
       </div>
 
-      @for (room of rooms; track room.id) {
+      @for (room of rooms$ | async; track room.id) {
         <mat-list-item
           class="room-item"
-          [class.active]="room.id === selectedRoomId"
+          [class.active]="room.id === (selectedRoomId$ | async)"
           (click)="selectRoom(room.id)">
           <mat-icon matListItemIcon>chat</mat-icon>
           <span>{{ room.name }}</span>
@@ -43,7 +43,7 @@
 
     <!-- Chat -->
     <mat-card class="chat-container">
-      @if (!selectedRoomId) {
+      @if (!(selectedRoomId$ | async)) {
         <div class="no-room-selected">
           <p>Selecciona una sala para empezar a chatear</p>
         </div>
