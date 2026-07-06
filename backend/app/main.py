@@ -40,8 +40,10 @@ def on_startup():
 # ============================================================
 from app.routers.auth import router as auth_router
 from app.routers.rooms import router as rooms_router
+from app.routers.ai import router as ai_router
 app.include_router(auth_router)
 app.include_router(rooms_router)
+app.include_router(ai_router)
 
 
 # ============================================================
@@ -132,20 +134,22 @@ async def websocket_endpoint(
     from app.services.message_service import MessageService
     from app.repositories.user_repository import UserRepository
 
+    # Aceptar WebSocket primero para evitar que el navegador muestre
+    # "WebSocket is closed before the connection is established"
+    await manager.connect(websocket, room_id, email, displayName)
+
     db = SessionLocal()
     try:
         service = RoomService(db)
         room = service.get_room_by_id(room_id)
         if not room:
-            await websocket.close(code=4004, reason="Room not found")
+            manager.disconnect(websocket, room_id, email)
+            await websocket.send_json({"type": "error", "detail": "Room not found"})
+            await websocket.close(code=4004)
             return
         user_repo = UserRepository(db)
-    finally:
-        db.close()
 
-    await manager.connect(websocket, room_id, email, displayName)
-    try:
-      while True:
+        while True:
             data = await websocket.receive_text()
             message = json.loads(data)
             message["room_id"] = room_id
@@ -155,16 +159,12 @@ async def websocket_endpoint(
             sender_email = message.get("sender", "")
             user = user_repo.find_by_email(sender_email) if sender_email else None
             if user:
-                db = SessionLocal()
-                try:
-                    msg_service = MessageService(db)
-                    msg_service.send_message(
-                        room_id=room_id,
-                        user_id=user.id,
-                        content=message.get("content", "")
-                    )
-                finally:
-                    db.close()
+                msg_service = MessageService(db)
+                msg_service.send_message(
+                    room_id=room_id,
+                    user_id=user.id,
+                    content=message.get("content", "")
+                )
 
             await manager.broadcast(message, room_id)
     except WebSocketDisconnect:
@@ -173,3 +173,5 @@ async def websocket_endpoint(
     except Exception:
         manager.disconnect(websocket, room_id, email)
         await manager._broadcast_user_list(room_id)
+    finally:
+        db.close()

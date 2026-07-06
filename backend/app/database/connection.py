@@ -24,11 +24,17 @@ DATABASE_URL = os.getenv(
     "mysql+pymysql://avnadmin:tu_password@tu_host:25185/defaultdb"
 )
 
+# Configuración SSL para conexión segura con Aiven
+_ssl_args = {
+    "check_hostname": True,
+}
+
 # Motor de SQLAlchemy
 engine = create_engine(
     DATABASE_URL,
     pool_pre_ping=True,      # Verifica la conexión antes de usar
     pool_recycle=3600,      # Recicla conexiones cada hora
+    connect_args={"ssl": _ssl_args},
     echo=False               # Cambiar a True para ver SQL en consola
 )
 
