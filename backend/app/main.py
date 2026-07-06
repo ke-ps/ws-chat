@@ -5,7 +5,6 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Dict
 import json
-from datetime import datetime
 
 # ============================================================
 # PASO 2 - Crear la app FastAPI
@@ -132,7 +131,10 @@ async def websocket_endpoint(
     from app.database.connection import SessionLocal
     from app.services.room_service import RoomService
     from app.services.message_service import MessageService
+    from app.services.ai_service import AIService
+    from app.services.chat_service import ChatService
     from app.repositories.user_repository import UserRepository
+    from app.providers.ai import GroqProvider
 
     # Aceptar WebSocket primero para evitar que el navegador muestre
     # "WebSocket is closed before the connection is established"
@@ -147,26 +149,27 @@ async def websocket_endpoint(
             await websocket.send_json({"type": "error", "detail": "Room not found"})
             await websocket.close(code=4004)
             return
+
+        msg_service = MessageService(db)
         user_repo = UserRepository(db)
+        ai_service = AIService(GroqProvider())
+        chat_service = ChatService(msg_service, ai_service, user_repo)
 
         while True:
             data = await websocket.receive_text()
-            message = json.loads(data)
-            message["room_id"] = room_id
-            message["timestamp"] = datetime.now().isoformat()
+            raw = json.loads(data)
 
-            # Persist message in database
-            sender_email = message.get("sender", "")
-            user = user_repo.find_by_email(sender_email) if sender_email else None
-            if user:
-                msg_service = MessageService(db)
-                msg_service.send_message(
-                    room_id=room_id,
-                    user_id=user.id,
-                    content=message.get("content", "")
-                )
+            user_msg, ai_msg = chat_service.process_message(
+                room_id=room_id,
+                sender_email=raw.get("sender", ""),
+                content=raw.get("content", ""),
+                message_id=raw.get("id"),
+            )
 
-            await manager.broadcast(message, room_id)
+            if user_msg:
+                await manager.broadcast(user_msg, room_id)
+            if ai_msg:
+                await manager.broadcast(ai_msg, room_id)
     except WebSocketDisconnect:
         manager.disconnect(websocket, room_id, email)
         await manager._broadcast_user_list(room_id)
