@@ -13,6 +13,7 @@ class CreateRoomRequest(BaseModel):
 class RoomResponse(BaseModel):
     id: int
     name: str
+    room_type: str = "GENERAL"
     created_at: Optional[str] = None
 
     class Config:
@@ -25,6 +26,7 @@ def create_room(body: CreateRoomRequest, db: Session = Depends(get_db)):
     return RoomResponse(
         id=room.id,
         name=room.name,
+        room_type=room.room_type.value,
         created_at=room.created_at.isoformat() if room.created_at else None
     )
 
@@ -36,6 +38,7 @@ def list_rooms(db: Session = Depends(get_db)):
         RoomResponse(
             id=room.id,
             name=room.name,
+            room_type=room.room_type.value,
             created_at=room.created_at.isoformat() if room.created_at else None
         )
         for room in rooms
