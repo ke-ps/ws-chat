@@ -30,8 +30,14 @@ app.add_middleware(
 # ============================================================
 @app.on_event("startup")
 def on_startup():
-    from app.database.connection import init_db
+    from app.database.connection import init_db, SessionLocal
     init_db()
+    db = SessionLocal()
+    try:
+        from app.services.room_service import RoomService
+        RoomService(db).ensure_rag_room_exists()
+    finally:
+        db.close()
 
 
 # ============================================================

@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from app.repositories.room_repository import RoomRepository
 from app.models.room import Room
+from app.models.enums import RoomType
 from typing import List, Optional
 
 class RoomService:
@@ -17,3 +18,8 @@ class RoomService:
 
     def get_all_rooms(self) -> List[Room]:
         return self.repository.find_all()
+
+    def ensure_rag_room_exists(self) -> None:
+        existing = self.repository.find_by_room_type(RoomType.RAG)
+        if not existing:
+            self.repository.create(Room(name="Asistente IA (RAG)", room_type=RoomType.RAG))
