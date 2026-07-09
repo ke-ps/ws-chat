@@ -3,6 +3,7 @@ from app.repositories.message_repository import MessageRepository
 from app.repositories.room_repository import RoomRepository
 from app.repositories.user_repository import UserRepository
 from app.models.message import Message
+from app.models.enums import SenderType
 from typing import List, Tuple
 
 
@@ -22,7 +23,7 @@ class MessageService:
         if not user:
             raise ValueError("User not found")
 
-        message = Message(room_id=room_id, user_id=user_id, content=content)
+        message = Message(room_id=room_id, user_id=user_id, content=content, sender_type=SenderType.USER)
         return self.repository.create(message)
 
     def get_messages(self, room_id: int) -> List[Message]:
