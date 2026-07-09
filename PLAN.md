@@ -6,6 +6,19 @@ Estado del proyecto: 🟡 En desarrollo
 
 ---
 
+# Arquitectura
+
+Arquitectura utilizada:
+
+- Router → Service → Repository
+- AIProvider desacoplado mediante inyección de dependencias
+- AIService como punto de entrada para cualquier proveedor LLM
+- MessageProcessor encargado del procesamiento de mensajes
+- ChatService como coordinador del flujo
+- Preparado para futuras integraciones RAG sin modificar la arquitectura existente
+
+---
+
 # Fase 1 — Configuración inicial ✅
 
 - [x] Backend FastAPI
@@ -39,6 +52,7 @@ Estado del proyecto: 🟡 En desarrollo
 - [x] Recepción de mensajes
 - [x] Broadcast
 - [x] Firebase Admin SDK
+- [x] Usuarios conectados por sala
 
 ---
 
@@ -48,12 +62,17 @@ Estado del proyecto: 🟡 En desarrollo
 - [x] Service Layer
 - [x] Separación de responsabilidades
 - [x] Organización del proyecto
+- [x] AIProvider (Strategy Pattern)
+- [x] AIService
+- [x] Dependency Injection
+- [x] MessageProcessor
+- [x] ChatMessage / ChatResult (DTOs)
 
 ---
 
-# Fase 5 — Sistema de salas
+# Fase 5 — Sistema de salas ✅
 
-## 5.1 Backend de salas ✅
+## 5.1 Backend
 
 - [x] Modelo Room
 - [x] Repository
@@ -61,53 +80,52 @@ Estado del proyecto: 🟡 En desarrollo
 - [x] Router
 - [x] Persistencia
 
-## 5.2 Participantes ✅
+## 5.2 Participantes
 
 - [x] Tabla RoomMember
 - [x] Añadir miembro
 - [x] Listar miembros
 
-## 5.3 WebSocket por sala ✅
+## 5.3 WebSocket
 
 - [x] Endpoint /ws/{room_id}
 - [x] Validar sala
 - [x] Broadcast por sala
 
-## 5.4 Frontend de salas ✅
+## 5.4 Frontend
 
 - [x] Listar salas
 - [x] Cambio dinámico de sala
 - [x] Reconexión WebSocket
-- [x] Corrección de cambio de sala
 
-## 5.5 Gestión de salas desde el frontend
+## 5.5 Gestión de salas
 
 - [x] Crear sala
-- [x] Entrar automáticamente en la nueva sala
+- [x] Entrar automáticamente
 - [x] Actualizar listado
 - [x] Validaciones
 
-## 5.6 Persistencia de mensajes
+## 5.6 Persistencia
 
 - [x] Modelo Message
 - [x] Guardar mensajes
-- [x] Cargar historial por sala
+- [x] Cargar historial
 - [x] Ordenar por fecha
-- [ ] Mostrar historial al entrar
+- [x] Mostrar historial al entrar
 
 ---
 
-# Fase 6 — Funcionalidades del chat
+# Fase 6 — Mejoras del chat
 
 ## 6.1 Usuarios conectados
 
-- [ ] Mostrar usuarios conectados por sala
+- [x] Mostrar usuarios conectados por sala
 
 ## 6.2 Indicador de escritura
 
-- [ ] "Usuario está escribiendo..."
+- [ ] Usuario está escribiendo...
 
-## 6.3 Estado del WebSocket
+## 6.3 Estado WebSocket
 
 - [ ] Conectando
 - [ ] Conectado
@@ -116,83 +134,103 @@ Estado del proyecto: 🟡 En desarrollo
 
 ## 6.4 Reconexión automática
 
-- [ ] Reconectar automáticamente si se pierde la conexión
+- [ ] Reconexión automática
 
 ---
 
-# Fase 7 — Diseño (UI/UX)
+# Fase 7 — Diseño (Pendiente)
 
 ## Sidebar
 
-- [ ] Mejorar listado de salas
+- [ ] Mejorar listado
 - [ ] Iconos
 - [ ] Avatar
 
 ## Chat
 
-- [ ] Burbujas de mensajes
-- [ ] Mejor scroll
-- [ ] Hora de mensajes
+- [ ] Burbujas
+- [ ] Scroll
+- [ ] Hora
 - [ ] Responsive
 
 ## Apariencia
 
 - [ ] Tema moderno
 - [ ] Tema oscuro (opcional)
-- [ ] Animaciones básicas
+- [ ] Animaciones
 
 ---
 
-# Fase 8 — IA General
+# Fase 8 — IA General ✅
 
-## 8.1 Asistente global
+## Arquitectura
 
-- [ ] Crear usuario IA
-- [ ] Detectar mensajes que comiencen por @ia
-- [ ] Enviar consulta al modelo
-- [ ] Publicar la respuesta como un mensaje más del chat
+- [x] AIProvider
+- [x] GroqProvider
+- [x] AIService
+- [x] Dependencias FastAPI
+- [x] Endpoint de prueba
+- [x] Variables de entorno
+- [x] Manejo de errores
 
-## 8.2 Servicio IA
+## Chat IA
 
-- [ ] ai_service.py
-- [ ] Configuración del proveedor de IA
-- [ ] Variables de entorno
-- [ ] Manejo de errores
+- [x] Detectar mensajes "@IA"
+- [x] Procesar mediante MessageProcessor
+- [x] Consultar Groq
+- [x] Persistir respuestas IA
+- [x] SenderType (USER / AI / SYSTEM)
+- [x] Mostrar respuestas en tiempo real
+- [x] Mostrar respuestas en historial
 
 ---
 
-# Fase 9 — IA especializada (RAG)
+# Fase 9 — Preparación RAG ✅
 
-## 9.1 Salas IA
+## Arquitectura
 
-- [ ] Añadir tipo de sala (normal / ai)
+- [x] RoomType (GENERAL / RAG)
+- [x] Sala RAG creada automáticamente al iniciar el backend
+- [x] Arquitectura preparada para decidir flujo según RoomType
 
-## 9.2 Ingesta documental
+---
 
-- [ ] Subir documentación
-- [ ] Dividir documentos en chunks
-- [ ] Generar embeddings
+# Fase 10 — RAG
 
-## 9.3 Base vectorial
+## 10.1 Gestión documental
 
-- [ ] Almacenar embeddings
+- [ ] Subida de PDFs
+- [ ] Asociar documentos a la sala RAG
+- [ ] Gestión de documentos
+
+## 10.2 Procesamiento
+
+- [ ] Lectura PDF
+- [ ] División en chunks
+- [ ] Generación de embeddings
+
+## 10.3 Base vectorial
+
+- [ ] Índice vectorial
+- [ ] Recuperación semántica
+
+## 10.4 RAG Service
+
+- [ ] RAGService
 - [ ] Recuperar contexto
+- [ ] PromptBuilder
+- [ ] Integración con AIService
 
-## 9.4 Servicio RAG
+## 10.5 Chat RAG
 
-- [ ] rag_service.py
-- [ ] Buscar contexto relevante
-- [ ] Construir prompt
-- [ ] Generar respuesta
-
-## 9.5 Chat RAG
-
-- [ ] La IA responde únicamente usando la documentación disponible
-- [ ] Si no encuentra contexto, indicar que no dispone de información
+- [ ] Buscar automáticamente en toda la documentación
+- [ ] Responder únicamente usando el contexto recuperado
+- [ ] Si no existe contexto suficiente, indicar que no dispone de información
+- [ ] Mantener separada la IA general del RAG
 
 ---
 
-# Ideas futuras (Fuera del alcance actual)
+# Ideas futuras
 
 - [ ] Chat privado
 - [ ] Invitaciones
@@ -205,19 +243,29 @@ Estado del proyecto: 🟡 En desarrollo
 - [ ] CI/CD
 - [ ] Despliegue
 - [ ] Tests
+- [ ] Streaming de respuestas IA
+- [ ] Memoria conversacional
+- [ ] Múltiples proveedores LLM
+
+---
 
 # Convenciones
 
-Cada nueva funcionalidad debe cumplir:
+Cada nueva funcionalidad debe:
 
-- Mantener la arquitectura existente.
-- Implementar únicamente la fase solicitada.
-- No realizar refactors innecesarios.
-- No modificar funcionalidades ya implementadas.
-- No crear código que no sea necesario para la fase actual.
+- Mantener la arquitectura Router → Service → Repository.
+- No romper funcionalidades existentes.
+- Evitar refactors innecesarios.
+- Implementar únicamente la fase actual.
+- Mantener el proyecto preparado para futuras ampliaciones.
 
 ---
 
 # Flujo de desarrollo
 
-1.Actualizar este archivo marcando la fase como completada.
+1. Crear rama `feature/...`
+2. Implementar únicamente la fase correspondiente.
+3. Validar funcionamiento.
+4. Actualizar este PLAN.md.
+5. Commit.
+6. Merge a `develop`.

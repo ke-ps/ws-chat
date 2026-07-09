@@ -46,9 +46,11 @@ def on_startup():
 from app.routers.auth import router as auth_router
 from app.routers.rooms import router as rooms_router
 from app.routers.ai import router as ai_router
+from app.routers.documents import router as documents_router
 app.include_router(auth_router)
 app.include_router(rooms_router)
 app.include_router(ai_router)
+app.include_router(documents_router)
 
 
 # ============================================================
