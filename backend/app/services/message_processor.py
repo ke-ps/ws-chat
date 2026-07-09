@@ -61,10 +61,12 @@ class MessageProcessor:
             return None
 
         result = self._ai_service.ask(prompt, room_id)
+        self._message_service.save_ai_message(room_id=room_id, content=result)
 
         return ChatMessage(
             sender="IA",
             content=result,
             room_id=room_id,
             timestamp=datetime.now().isoformat(),
+            sender_type="AI",
         )

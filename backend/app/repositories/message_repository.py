@@ -26,7 +26,7 @@ class MessageRepository:
     def find_by_room_with_email(self, room_id: int) -> List[Tuple[Message, str]]:
         return (
             self.db.query(Message, User.email)
-            .join(User, Message.user_id == User.id)
+            .outerjoin(User, Message.user_id == User.id)
             .filter(Message.room_id == room_id)
             .order_by(Message.created_at.asc())
             .all()

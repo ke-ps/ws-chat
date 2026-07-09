@@ -8,6 +8,7 @@ class ChatMessage:
     content: str
     room_id: int
     timestamp: str
+    sender_type: str = "USER"
     id: Optional[str] = None
 
 

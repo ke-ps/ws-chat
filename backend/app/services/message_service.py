@@ -26,6 +26,14 @@ class MessageService:
         message = Message(room_id=room_id, user_id=user_id, content=content, sender_type=SenderType.USER)
         return self.repository.create(message)
 
+    def save_ai_message(self, room_id: int, content: str) -> Message:
+        room = self.room_repo.find_by_id(room_id)
+        if not room:
+            raise ValueError("Room not found")
+
+        message = Message(room_id=room_id, user_id=None, content=content, sender_type=SenderType.AI)
+        return self.repository.create(message)
+
     def get_messages(self, room_id: int) -> List[Message]:
         room = self.room_repo.find_by_id(room_id)
         if not room:

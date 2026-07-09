@@ -91,7 +91,8 @@ def list_members(room_id: int, db: Session = Depends(get_db)):
 class MessageResponse(BaseModel):
     id: int
     room_id: int
-    user_id: int
+    user_id: Optional[int] = None
+    sender_type: str
     content: str
     user_email: Optional[str] = None
     created_at: Optional[str] = None
@@ -111,6 +112,7 @@ def list_messages(room_id: int, db: Session = Depends(get_db)):
                 id=m.id,
                 room_id=m.room_id,
                 user_id=m.user_id,
+                sender_type=m.sender_type.value,
                 content=m.content,
                 user_email=email,
                 created_at=m.created_at.isoformat() if m.created_at else None

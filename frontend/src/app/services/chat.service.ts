@@ -106,6 +106,7 @@ export class ChatService {
         id: String(m.id),
         content: m.content,
         sender: m.user_email || String(m.user_id),
+        senderType: m.sender_type || 'USER',
         timestamp: new Date(m.created_at)
       }));
       this.messagesSubject.next(messages);
@@ -139,6 +140,7 @@ export class ChatService {
       id: crypto.randomUUID(),
       content,
       sender,
+      senderType: 'USER',
       timestamp: new Date()
     };
 
@@ -181,6 +183,7 @@ export class ChatService {
         id: data.id || crypto.randomUUID(),
         content: data.content,
         sender: data.sender,
+        senderType: data.sender_type || 'USER',
         timestamp: new Date(data.timestamp)
       };
       const currentMessages = this.messagesSubject.getValue();

@@ -174,6 +174,7 @@ async def websocket_endpoint(
                     "sender": msg.sender,
                     "content": msg.content,
                     "room_id": msg.room_id,
+                    "sender_type": msg.sender_type,
                     "timestamp": msg.timestamp,
                     **({"id": msg.id} if msg.id else {}),
                 }, room_id)
@@ -183,6 +184,7 @@ async def websocket_endpoint(
                     "sender": msg.sender,
                     "content": msg.content,
                     "room_id": msg.room_id,
+                    "sender_type": msg.sender_type,
                     "timestamp": msg.timestamp,
                 }, room_id)
     except WebSocketDisconnect:
