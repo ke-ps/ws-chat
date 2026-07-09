@@ -22,7 +22,7 @@ def ai_test(
     service: AIService = Depends(get_ai_service),
 ) -> PromptResponse:
     try:
-        result = service.ask(body.prompt)
+        result = service.ask(body.prompt, room_id=0)
         return PromptResponse(response=result)
     except GroqError:
         raise HTTPException(status_code=502, detail="AI service unavailable")

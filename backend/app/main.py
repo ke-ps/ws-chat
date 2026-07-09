@@ -132,6 +132,7 @@ async def websocket_endpoint(
     from app.services.room_service import RoomService
     from app.services.message_service import MessageService
     from app.services.ai_service import AIService
+    from app.services.message_processor import MessageProcessor
     from app.services.chat_service import ChatService
     from app.repositories.user_repository import UserRepository
     from app.providers.ai import GroqProvider
@@ -153,23 +154,37 @@ async def websocket_endpoint(
         msg_service = MessageService(db)
         user_repo = UserRepository(db)
         ai_service = AIService(GroqProvider())
-        chat_service = ChatService(msg_service, ai_service, user_repo)
+        processor = MessageProcessor(msg_service, ai_service, user_repo)
+        chat_service = ChatService(processor)
 
         while True:
             data = await websocket.receive_text()
             raw = json.loads(data)
 
-            user_msg, ai_msg = chat_service.process_message(
+            result = chat_service.process_message(
                 room_id=room_id,
                 sender_email=raw.get("sender", ""),
                 content=raw.get("content", ""),
                 message_id=raw.get("id"),
             )
 
-            if user_msg:
-                await manager.broadcast(user_msg, room_id)
-            if ai_msg:
-                await manager.broadcast(ai_msg, room_id)
+            if result.user_message:
+                msg = result.user_message
+                await manager.broadcast({
+                    "sender": msg.sender,
+                    "content": msg.content,
+                    "room_id": msg.room_id,
+                    "timestamp": msg.timestamp,
+                    **({"id": msg.id} if msg.id else {}),
+                }, room_id)
+            if result.ai_message:
+                msg = result.ai_message
+                await manager.broadcast({
+                    "sender": msg.sender,
+                    "content": msg.content,
+                    "room_id": msg.room_id,
+                    "timestamp": msg.timestamp,
+                }, room_id)
     except WebSocketDisconnect:
         manager.disconnect(websocket, room_id, email)
         await manager._broadcast_user_list(room_id)
