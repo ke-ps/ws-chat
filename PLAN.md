@@ -247,7 +247,7 @@ Cada nueva funcionalidad debe:
 - No realizar refactors innecesarios.
 - No modificar funcionalidades ya implementadas.
 - No crear código que no sea necesario para la fase actual.
--No reestructures ni simplifiques PLAN.md. Conserva íntegramente el contenido existente y limita los cambios a marcar como completada la tarea implementada en esta fase. No elimines, renombres, reordenes ni modifiques fases o tareas ya existentes.
+- No reestructures ni simplifiques PLAN.md. Conserva íntegramente el     contenido existente y limita los cambios a marcar como completada la tarea implementada en esta fase. No elimines, renombres, reordenes ni modifiques fases o tareas ya existentes.
 
 ---
 
