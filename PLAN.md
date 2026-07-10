@@ -198,7 +198,7 @@ Estado del proyecto: 🟡 En desarrollo
 - [x] Registro de documentos
 - [x] Subida de PDFs
 - [x] Extracción de texto
-- [ ] División en chunks
+- [x] División en chunks
 - [ ] Embeddings
 
 ## 10.2 Base vectorial
