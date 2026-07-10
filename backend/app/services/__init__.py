@@ -5,3 +5,4 @@ from .ai_service import AIService
 from .message_service import MessageService
 from .message_processor import MessageProcessor
 from .chat_service import ChatService
+from .document_service import DocumentService

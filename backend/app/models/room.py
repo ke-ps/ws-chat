@@ -15,6 +15,7 @@ class Room(Base):
 
     members = relationship("RoomMember", back_populates="room")
     messages = relationship("Message", back_populates="room")
+    documents = relationship("Document", back_populates="room")
 
     def __repr__(self):
         return f"<Room(id={self.id}, name={self.name})>"
