@@ -6,3 +6,4 @@ from .message_service import MessageService
 from .message_processor import MessageProcessor
 from .chat_service import ChatService
 from .document_service import DocumentService
+from .pdf_extraction_service import PDFExtractionService, PDFExtractionError

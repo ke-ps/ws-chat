@@ -197,7 +197,7 @@ Estado del proyecto: 🟡 En desarrollo
 
 - [x] Registro de documentos
 - [x] Subida de PDFs
-- [ ] Extracción de texto
+- [x] Extracción de texto
 - [ ] División en chunks
 - [ ] Embeddings
 

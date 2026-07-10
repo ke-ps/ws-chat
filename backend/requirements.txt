@@ -44,6 +44,7 @@ pydantic_core==2.46.4
 PyJWT==2.13.0
 PyMySQL==1.1.1
 pyparsing==3.3.2
+PyMuPDF==1.28.0
 python-dotenv==1.0.1
 python-multipart==0.0.32
 PyYAML==6.0.3
