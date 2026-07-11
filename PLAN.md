@@ -199,7 +199,7 @@ Estado del proyecto: 🟡 En desarrollo
 - [x] Subida de PDFs
 - [x] Extracción de texto
 - [x] División en chunks
-- [ ] Embeddings
+- [x] Embeddings (OpenAI → Gemini)
 
 ## 10.2 Base vectorial
 

@@ -9,8 +9,12 @@ class Settings(BaseSettings):
     FIREBASE_SERVICE_ACCOUNT: str = "firebase-service-account.json"
 
     # OpenAI
-    OPENAI_API_KEY: str = ""
     OPENAI_MODEL: str = "gpt-4o-mini"
+
+    # Embeddings
+    GEMINI_API_KEY: str = ""
+    GEMINI_EMBEDDING_MODEL: str = "gemini-embedding-2"
+    GEMINI_EMBEDDING_DIMENSIONALITY: int = 768
 
     # Groq
     GROQ_API_KEY: str = ""
