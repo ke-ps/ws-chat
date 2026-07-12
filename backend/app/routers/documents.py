@@ -5,6 +5,7 @@ from app.services.document_service import DocumentService
 from app.services.ingestion_service import IngestionService
 from app.services.embedding_service import EmbeddingService
 from app.services.semantic_search_service import SemanticSearchService
+from app.services.context_service import ContextService
 from app.providers.embeddings import GeminiEmbeddingProvider
 from pydantic import BaseModel
 from typing import Optional, List
@@ -121,3 +122,17 @@ def search_chunks(room_id: int, query: str, top_k: int = 5, db: Session = Depend
             for r in results
         ]
     )
+
+
+class ContextResponse(BaseModel):
+    context: str
+
+
+@router.post("/search/context")
+def retrieve_context(room_id: int, query: str, top_k: int = 5, db: Session = Depends(get_db)):
+    provider = GeminiEmbeddingProvider()
+    embedding_service = EmbeddingService(provider)
+    search_service = SemanticSearchService(db, embedding_service)
+    context_service = ContextService(search_service)
+    context = context_service.retrieve_context(query, top_k=top_k)
+    return ContextResponse(context=context)

@@ -11,3 +11,4 @@ from .chunking_service import ChunkingService
 from .embedding_service import EmbeddingService
 from .ingestion_service import IngestionService
 from .semantic_search_service import SemanticSearchService
+from .context_service import ContextService

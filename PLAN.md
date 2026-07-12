@@ -205,7 +205,7 @@ Estado del proyecto: 🟡 En desarrollo
 
 - [x] Almacenar embeddings
 - [x] Búsqueda semántica
-- [ ] Recuperación automática de contexto
+- [x] Recuperación automática de contexto
 
 ## 10.3 Servicio RAG
 
