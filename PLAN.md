@@ -187,7 +187,7 @@ Estado del proyecto: 🟡 En desarrollo
 
 - [ ] AIService decidirá entre IA General o RAG según room_type
 - [ ] Crear RAGService
-- [ ] Mantener Provider independiente del RAG
+- [x] Mantener Provider independiente del RAG
 
 ---
 
@@ -203,7 +203,7 @@ Estado del proyecto: 🟡 En desarrollo
 
 ## 10.2 Base vectorial
 
-- [ ] Almacenar embeddings
+- [x] Almacenar embeddings
 - [ ] Búsqueda semántica
 - [ ] Recuperación automática de contexto
 

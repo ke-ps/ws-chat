@@ -2,6 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from app.database.connection import get_db
 from app.services.document_service import DocumentService
+from app.services.ingestion_service import IngestionService
+from app.services.embedding_service import EmbeddingService
+from app.providers.embeddings import GeminiEmbeddingProvider
 from pydantic import BaseModel
 from typing import Optional
 
@@ -66,3 +69,24 @@ def delete_document(room_id: int, document_id: int, db: Session = Depends(get_db
     
     service.delete_document(document_id)
     return {"detail": "Document deleted"}
+
+
+@router.post("/{document_id}/ingest")
+def ingest_document(room_id: int, document_id: int, db: Session = Depends(get_db)):
+    document_service = DocumentService(db)
+    document = document_service.get_document_by_id(document_id)
+    if not document or document.room_id != room_id:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    provider = GeminiEmbeddingProvider()
+    embedding_service = EmbeddingService(provider)
+    ingestion_service = IngestionService(db, embedding_service)
+    try:
+        chunks = ingestion_service.ingest_document(document_id)
+        return {
+            "detail": f"Ingested {len(chunks)} chunks",
+            "document_id": document_id,
+            "chunks_count": len(chunks),
+        }
+    except (ValueError, Exception) as e:
+        raise HTTPException(status_code=400, detail=str(e))

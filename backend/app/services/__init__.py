@@ -9,3 +9,4 @@ from .document_service import DocumentService
 from .pdf_extraction_service import PDFExtractionService, PDFExtractionError
 from .chunking_service import ChunkingService
 from .embedding_service import EmbeddingService
+from .ingestion_service import IngestionService
