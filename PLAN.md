@@ -185,7 +185,7 @@ Estado del proyecto: 🟡 En desarrollo
 
 ## 9.2 Flujo
 
-- [ ] AIService decidirá entre IA General o RAG según room_type
+- [x] AIService decidirá entre IA General o RAG según room_type
 - [x] Crear RAGService
 - [x] Mantener Provider independiente del RAG
 
@@ -209,15 +209,15 @@ Estado del proyecto: 🟡 En desarrollo
 
 ## 10.3 Servicio RAG
 
-- [ ] RAGService
-- [ ] Construcción del contexto
-- [ ] Prompt enriquecido
-- [ ] Integración con AIService
+- [x] RAGService
+- [x] Construcción del contexto
+- [x] Prompt enriquecido
+- [x] Integración con AIService
 
 ## 10.4 Chat RAG
 
-- [ ] Solo disponible en la sala RAG
-- [ ] Búsqueda automática en todos los documentos
+- [x] Solo disponible en la sala RAG
+- [x] Búsqueda automática en todos los documentos
 - [ ] Si no existe contexto suficiente, responder que la documentación no contiene esa información
 - [ ] No utilizar conocimiento general del modelo
 

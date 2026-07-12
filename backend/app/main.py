@@ -142,6 +142,11 @@ async def websocket_endpoint(
     from app.services.ai_service import AIService
     from app.services.message_processor import MessageProcessor
     from app.services.chat_service import ChatService
+    from app.services.rag_service import RAGService
+    from app.services.context_service import ContextService
+    from app.services.semantic_search_service import SemanticSearchService
+    from app.services.embedding_service import EmbeddingService
+    from app.providers.embeddings import GeminiEmbeddingProvider
     from app.repositories.user_repository import UserRepository
     from app.providers.ai import GroqProvider
 
@@ -161,7 +166,15 @@ async def websocket_endpoint(
 
         msg_service = MessageService(db)
         user_repo = UserRepository(db)
-        ai_service = AIService(GroqProvider())
+
+        embedding_provider = GeminiEmbeddingProvider()
+        embedding_service = EmbeddingService(embedding_provider)
+        search_service = SemanticSearchService(db, embedding_service)
+        context_service = ContextService(search_service)
+        rag_service = RAGService(context_service)
+        room_service = RoomService(db)
+
+        ai_service = AIService(GroqProvider(), rag_service=rag_service, room_service=room_service)
         processor = MessageProcessor(msg_service, ai_service, user_repo)
         chat_service = ChatService(processor)
 
