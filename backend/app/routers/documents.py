@@ -4,9 +4,10 @@ from app.database.connection import get_db
 from app.services.document_service import DocumentService
 from app.services.ingestion_service import IngestionService
 from app.services.embedding_service import EmbeddingService
+from app.services.semantic_search_service import SemanticSearchService
 from app.providers.embeddings import GeminiEmbeddingProvider
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 
 router = APIRouter(prefix="/rooms/{room_id}/documents", tags=["documents"])
 
@@ -90,3 +91,33 @@ def ingest_document(room_id: int, document_id: int, db: Session = Depends(get_db
         }
     except (ValueError, Exception) as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+class SearchResultItem(BaseModel):
+    document_id: int
+    chunk_index: int
+    content: str
+    score: float
+
+
+class SearchResponse(BaseModel):
+    results: List[SearchResultItem]
+
+
+@router.post("/search")
+def search_chunks(room_id: int, query: str, top_k: int = 5, db: Session = Depends(get_db)):
+    provider = GeminiEmbeddingProvider()
+    embedding_service = EmbeddingService(provider)
+    search_service = SemanticSearchService(db, embedding_service)
+    results = search_service.search(query, top_k=top_k)
+    return SearchResponse(
+        results=[
+            SearchResultItem(
+                document_id=r.chunk.document_id,
+                chunk_index=r.chunk.chunk_index,
+                content=r.chunk.content,
+                score=round(r.score, 4),
+            )
+            for r in results
+        ]
+    )

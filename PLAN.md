@@ -204,7 +204,7 @@ Estado del proyecto: 🟡 En desarrollo
 ## 10.2 Base vectorial
 
 - [x] Almacenar embeddings
-- [ ] Búsqueda semántica
+- [x] Búsqueda semántica
 - [ ] Recuperación automática de contexto
 
 ## 10.3 Servicio RAG

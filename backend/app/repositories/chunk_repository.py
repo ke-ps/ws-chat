@@ -26,6 +26,11 @@ class ChunkRepository:
             self.db.refresh(c)
         return chunks
 
+    def find_all_with_embedding(self) -> List[Chunk]:
+        return self.db.query(Chunk).filter(
+            Chunk.embedding.isnot(None)
+        ).all()
+
     def delete_by_document(self, document_id: int) -> None:
         self.db.query(Chunk).filter(Chunk.document_id == document_id).delete()
         self.db.commit()
