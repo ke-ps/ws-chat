@@ -186,7 +186,7 @@ Estado del proyecto: 🟡 En desarrollo
 ## 9.2 Flujo
 
 - [ ] AIService decidirá entre IA General o RAG según room_type
-- [ ] Crear RAGService
+- [x] Crear RAGService
 - [x] Mantener Provider independiente del RAG
 
 ---

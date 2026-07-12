@@ -6,6 +6,7 @@ from app.services.ingestion_service import IngestionService
 from app.services.embedding_service import EmbeddingService
 from app.services.semantic_search_service import SemanticSearchService
 from app.services.context_service import ContextService
+from app.services.rag_service import RAGService
 from app.providers.embeddings import GeminiEmbeddingProvider
 from pydantic import BaseModel
 from typing import Optional, List
@@ -136,3 +137,18 @@ def retrieve_context(room_id: int, query: str, top_k: int = 5, db: Session = Dep
     context_service = ContextService(search_service)
     context = context_service.retrieve_context(query, top_k=top_k)
     return ContextResponse(context=context)
+
+
+class RAGPromptResponse(BaseModel):
+    prompt: str
+
+
+@router.post("/search/rag-prompt")
+def rag_prompt(room_id: int, query: str, top_k: int = 5, db: Session = Depends(get_db)):
+    provider = GeminiEmbeddingProvider()
+    embedding_service = EmbeddingService(provider)
+    search_service = SemanticSearchService(db, embedding_service)
+    context_service = ContextService(search_service)
+    rag_service = RAGService(context_service)
+    prompt = rag_service.generate(query, top_k=top_k)
+    return RAGPromptResponse(prompt=prompt)
