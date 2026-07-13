@@ -171,7 +171,7 @@ async def websocket_endpoint(
         embedding_service = EmbeddingService(embedding_provider)
         search_service = SemanticSearchService(db, embedding_service)
         context_service = ContextService(search_service)
-        rag_service = RAGService(context_service)
+        rag_service = RAGService(context_service, search_service)
         room_service = RoomService(db)
 
         ai_service = AIService(GroqProvider(), rag_service=rag_service, room_service=room_service)

@@ -28,6 +28,24 @@ class SemanticSearchService:
         self.chunk_repository = ChunkRepository(db)
         self.embedding_service = embedding_service
 
+    def get_top_score(self, query: str) -> float:
+        query_embedding = self.embedding_service.generate(query)
+        if not query_embedding:
+            return 0.0
+
+        chunks = self.chunk_repository.find_all_with_embedding()
+        if not chunks:
+            return 0.0
+
+        best = 0.0
+        for chunk in chunks:
+            if not chunk.embedding:
+                continue
+            score = _cosine_similarity(query_embedding, chunk.embedding)
+            if score > best:
+                best = score
+        return best
+
     def search(self, query: str, top_k: int = 5) -> List[SemanticSearchResult]:
         query_embedding = self.embedding_service.generate(query)
         if not query_embedding:

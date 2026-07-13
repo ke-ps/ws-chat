@@ -218,7 +218,7 @@ Estado del proyecto: 🟡 En desarrollo
 
 - [x] Solo disponible en la sala RAG
 - [x] Búsqueda automática en todos los documentos
-- [ ] Si no existe contexto suficiente, responder que la documentación no contiene esa información
+- [x] Si no existe contexto suficiente, responder que la documentación no contiene esa información
 - [ ] No utilizar conocimiento general del modelo
 
 ---

@@ -149,6 +149,6 @@ def rag_prompt(room_id: int, query: str, top_k: int = 5, db: Session = Depends(g
     embedding_service = EmbeddingService(provider)
     search_service = SemanticSearchService(db, embedding_service)
     context_service = ContextService(search_service)
-    rag_service = RAGService(context_service)
+    rag_service = RAGService(context_service, search_service)
     prompt = rag_service.generate(query, top_k=top_k)
     return RAGPromptResponse(prompt=prompt)
