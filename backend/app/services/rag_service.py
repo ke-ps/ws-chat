@@ -10,15 +10,21 @@ _NO_CONTEXT_MESSAGE = (
 )
 
 _PROMPT_TEMPLATE = (
-    "Eres un asistente especializado en responder preguntas "
-    "basándote exclusivamente en la documentación proporcionada.\n\n"
+    "Eres un asistente de preguntas y respuestas. "
+    "Tu conocimiento está limitado EXCLUSIVAMENTE "
+    "a la documentación que se te proporciona a continuación. "
+    "NO puedes usar tu conocimiento previo para responder.\n\n"
     "Documentación:\n{context}\n\n"
     "Pregunta: {query}\n\n"
-    "Instrucciones:\n"
-    "- Responde únicamente con la información de la documentación.\n"
-    "- Si la documentación no contiene la respuesta, "
-    "indica que no hay información suficiente.\n"
-    "- No utilices conocimiento general.\n"
+    "Instrucciones estrictas:\n"
+    "- Si la documentación contiene información para responder, "
+    "responde usando SOLO esa información.\n"
+    "- Si la documentación NO contiene la respuesta, "
+    "responde exactamente:\n"
+    "  \"No hay información suficiente en la documentación "
+    "para responder a esta pregunta.\"\n"
+    "- NO inventes información.\n"
+    "- NO uses tu conocimiento general.\n"
     "- Responde en el mismo idioma de la pregunta."
 )
 
