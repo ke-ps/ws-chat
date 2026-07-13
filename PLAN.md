@@ -221,6 +221,12 @@ Estado del proyecto: 🟡 En desarrollo
 - [x] Si no existe contexto suficiente, responder que la documentación no contiene esa información
 - [x] No utilizar conocimiento general del modelo
 
+# Fase 11 — Optimización de la ingesta
+
+## 11.1 Escalabilidad
+
+- [] Procesamiento eficiente de documentos grandes
+
 ---
 
 # Ideas futuras

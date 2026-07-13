@@ -15,11 +15,18 @@ class GeminiEmbeddingProvider(EmbeddingProvider):
         self._dimensionality = settings.GEMINI_EMBEDDING_DIMENSIONALITY
 
     def generate(self, text: str) -> List[float]:
+        return self.generate_batch([text])[0]
+
+    def generate_batch(self, texts: List[str]) -> List[List[float]]:
+        texts = [t for t in texts if t]
+        if not texts:
+            return []
+
         result = self._client.models.embed_content(
             model=self._model,
-            contents=text,
+            contents=texts,
             config=types.EmbedContentConfig(
                 outputDimensionality=self._dimensionality,
             ),
         )
-        return result.embeddings[0].values
+        return [e.values for e in result.embeddings]

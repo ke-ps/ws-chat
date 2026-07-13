@@ -11,6 +11,9 @@ from app.services.chunking_service import ChunkingService
 from app.services.embedding_service import EmbeddingService
 
 
+EMBEDDING_BATCH_SIZE = 100
+
+
 class IngestionService:
 
     def __init__(self, db: Session, embedding_service: EmbeddingService):
@@ -31,15 +34,20 @@ class IngestionService:
 
         self.chunk_repository.delete_by_document(document_id)
 
-        db_chunks = []
-        for i, chunk_text in enumerate(chunks):
-            embedding = self.embedding_service.generate(chunk_text)
-            chunk = Chunk(
-                document_id=document_id,
-                chunk_index=i,
-                content=chunk_text,
-                embedding=embedding,
-            )
-            db_chunks.append(chunk)
+        all_chunks: List[Chunk] = []
+        batch_size = EMBEDDING_BATCH_SIZE
+        for batch_start in range(0, len(chunks), batch_size):
+            batch = chunks[batch_start:batch_start + batch_size]
+            embeddings = self.embedding_service.generate_batch(batch)
+            batch_chunks = []
+            for offset, (chunk_text, embedding) in enumerate(zip(batch, embeddings)):
+                chunk = Chunk(
+                    document_id=document_id,
+                    chunk_index=batch_start + offset,
+                    content=chunk_text,
+                    embedding=embedding,
+                )
+                batch_chunks.append(chunk)
+            all_chunks.extend(self.chunk_repository.create_all(batch_chunks))
 
-        return self.chunk_repository.create_all(db_chunks)
+        return all_chunks
